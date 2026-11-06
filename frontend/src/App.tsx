@@ -7,7 +7,8 @@ export default function App() {
   const { location, now, best_window, hourly } = mockData;
 
   return (
-<div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-6 md:p-10">      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-6 md:p-10">    
+      <div className="max-w-4xl mx-auto space-y-6">
         
         {/* Header */}
         <header className="flex justify-between items-center bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700">
