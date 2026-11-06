@@ -1,0 +1,18 @@
+{
+  "location": {"id": "uptown", "name": "Uptown", "lat": 35.2271, "lon": -80.8431},
+  "profile": "casual",
+  "generated_at": "2026-11-06T14:00:00-05:00",
+  "now": {"score": 82, "label": "Great"},
+  "best_window": {"start": "2026-11-06T16:00", "end": "2026-11-06T18:00", "avg_score": 88},
+  "hourly": [
+    {"time": "2026-11-06T12:00", "feels_f": 68, "rain_pct": 0, "wind_mph": 5, "uv": 4.1, "aqi": 35, "score": 75, "label": "Great"},
+    {"time": "2026-11-06T13:00", "feels_f": 72, "rain_pct": 0, "wind_mph": 6, "uv": 5.2, "aqi": 38, "score": 78, "label": "Great"},
+    {"time": "2026-11-06T14:00", "feels_f": 75, "rain_pct": 10, "wind_mph": 8, "uv": 4.5, "aqi": 42, "score": 82, "label": "Great"},
+    {"time": "2026-11-06T15:00", "feels_f": 77, "rain_pct": 10, "wind_mph": 7, "uv": 3.1, "aqi": 40, "score": 85, "label": "Great"},
+    {"time": "2026-11-06T16:00", "feels_f": 76, "rain_pct": 5, "wind_mph": 6, "uv": 2.0, "aqi": 36, "score": 90, "label": "Great"},
+    {"time": "2026-11-06T17:00", "feels_f": 73, "rain_pct": 0, "wind_mph": 5, "uv": 1.0, "aqi": 32, "score": 92, "label": "Great"},
+    {"time": "2026-11-06T18:00", "feels_f": 70, "rain_pct": 0, "wind_mph": 4, "uv": 0.2, "aqi": 30, "score": 88, "label": "Great"},
+    {"time": "2026-11-06T19:00", "feels_f": 65, "rain_pct": 0, "wind_mph": 4, "uv": 0.0, "aqi": 28, "score": 80, "label": "Great"}
+  ],
+  "source_status": {"weather": "ok", "air_quality": "ok"}
+}
