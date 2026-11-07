@@ -5,15 +5,32 @@ import HourlyCards from "./components/HourlyCards";
 import MapView from "./components/MapView";
 import ProfileSelector from "./components/ProfileSelector";
 import ScoreChart from "./components/ScoreChart";
+import Toolbar from "./components/Toolbar";
 
 export default function App() {
-const [locations, setLocations] = useState<any[]>([]);
-  const [overview, setOverview] = useState<any[]>([]);
+  const [locations, setLocations] = useState([]);
+  const [overview, setOverview] = useState([]);
   const [selectedId, setSelectedId] = useState("uptown");
   const [profile, setProfile] = useState("casual");
- const [conditions, setConditions] = useState<any>(null);
+  const [conditions, setConditions] = useState(null);
   const [loading, setLoading] = useState(true);
-const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
+  const [scale, setScale] = useState(1);
+
+  // Polish states
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem("clearday_dark") === "true";
+  });
+  const [fontSize, setFontSize] = useState(16);
+
+ useEffect(() => {
+  if (darkMode) {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
+}, [darkMode]);
+
   useEffect(() => {
     fetch("http://127.0.0.1:8000/api/locations")
       .then((res) => res.json())
@@ -21,18 +38,18 @@ const [error, setError] = useState<string | null>(null);
       .catch((err) => console.error("Failed to load locations", err));
   }, []);
 
-  const fetchOverview = async (prof: string) => {
+  const fetchOverview = async (prof) => {
     try {
       const res = await fetch(`http://127.0.0.1:8000/api/overview?profile=${prof}`);
       if (!res.ok) throw new Error("Overview data unavailable");
       const json = await res.json();
       setOverview(json);
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
     }
   };
 
-  const fetchConditions = async (locId: string, prof: string) => {
+  const fetchConditions = async (locId, prof) => {
     setLoading(true);
     setError(null);
     try {
@@ -57,7 +74,7 @@ const [error, setError] = useState<string | null>(null);
 
   if (loading && !conditions) {
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
+      <div className={`min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center ${darkMode ? "dark" : ""}`}>
         <div className="text-center space-y-4">
           <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
           <p className="text-gray-600 dark:text-gray-400 font-medium">Loading ClearDay CLT...</p>
@@ -66,28 +83,14 @@ const [error, setError] = useState<string | null>(null);
     );
   }
 
-  if (error && !conditions) {
-    return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center p-6">
-        <div className="max-w-md w-full bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl border border-red-200 dark:border-red-900 text-center space-y-4">
-          <div className="w-12 h-12 bg-red-100 dark:bg-red-900/50 text-red-600 rounded-full flex items-center justify-center mx-auto text-xl font-bold">!</div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Unable to load data</h2>
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-          <button
-            onClick={() => fetchConditions(selectedId, profile)}
-            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition-colors"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   const { location, now, best_window, hourly } = conditions || {};
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-6 md:p-10">
+    <div className={`min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 p-6 md:p-10 ${darkMode ? "dark" : ""}`} style={{
+  fontSize: `${fontSize}px`,
+  transform: `scale(${scale})`,
+  transformOrigin: "top center"
+}}>
       <div className="max-w-4xl mx-auto space-y-6">
         
         {/* Header */}
@@ -113,6 +116,14 @@ const [error, setError] = useState<string | null>(null);
           </div>
         </header>
 
+        {/* Polish & Accessibility Toolbar */}
+        <Toolbar
+          darkMode={darkMode}
+          onToggleDarkMode={() => setDarkMode(!darkMode)}
+          fontSize={fontSize}
+          onChangeFontSize={(size) => setFontSize(size)}
+        />
+
         {/* Profile Selector */}
         <ProfileSelector currentProfile={profile} onSelectProfile={(p) => setProfile(p)} />
 
@@ -133,14 +144,14 @@ const [error, setError] = useState<string | null>(null);
             <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 flex-1 flex flex-col justify-center">
               <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Summary</h3>
               <p className="text-base font-semibold text-gray-800 dark:text-gray-200">
-              Conditions for <span className="text-blue-600 dark:text-blue-400 font-bold">{profile}</span> mode are currently {(now?.label ?? "").toLowerCase()}.
+                Conditions for <span className="text-blue-600 dark:text-blue-400 font-bold">{profile}</span> mode are currently {now?.label.toLowerCase()}.
               </p>
             </div>
           </div>
         </div>
 
         {/* Recharts Score Trend */}
-       {hourly && <ScoreChart hourly={hourly} />} 
+        {hourly && <ScoreChart hourly={hourly} />} 
 
         {/* Hourly Cards */}
         {hourly && <HourlyCards hourly={hourly} />}
