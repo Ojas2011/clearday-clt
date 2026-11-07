@@ -3,16 +3,17 @@ import ScoreBadge from "./components/ScoreBadge";
 import BestWindowBanner from "./components/BestWindowBanner";
 import HourlyCards from "./components/HourlyCards";
 import MapView from "./components/MapView";
+import ProfileSelector from "./components/ProfileSelector";
+import ScoreChart from "./components/ScoreChart";
 
 export default function App() {
-  const [locations, setLocations] = useState<any[]>([]);
+const [locations, setLocations] = useState<any[]>([]);
   const [overview, setOverview] = useState<any[]>([]);
   const [selectedId, setSelectedId] = useState("uptown");
-  const [conditions, setConditions] = useState<any>(null); 
+  const [profile, setProfile] = useState("casual");
+ const [conditions, setConditions] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // Fetch locations preset list once
+const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     fetch("http://127.0.0.1:8000/api/locations")
       .then((res) => res.json())
@@ -20,10 +21,9 @@ export default function App() {
       .catch((err) => console.error("Failed to load locations", err));
   }, []);
 
-  // Fetch overview data for map markers
-  const fetchOverview = async () => {
+  const fetchOverview = async (prof: string) => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/overview?profile=casual");
+      const res = await fetch(`http://127.0.0.1:8000/api/overview?profile=${prof}`);
       if (!res.ok) throw new Error("Overview data unavailable");
       const json = await res.json();
       setOverview(json);
@@ -32,19 +32,18 @@ export default function App() {
     }
   };
 
-  // Fetch conditions for selected location
-  const fetchConditions = async (locId) => {
+  const fetchConditions = async (locId: string, prof: string) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/conditions?location_id=${locId}&profile=casual`);
+      const res = await fetch(`http://127.0.0.1:8000/api/conditions?location_id=${locId}&profile=${prof}`);
       if (!res.ok) {
         const errData = await res.json();
         throw new Error(errData.detail || "Data source unavailable");
       }
       const json = await res.json();
       setConditions(json);
-    } catch (err: any) {
+    } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
@@ -52,9 +51,9 @@ export default function App() {
   };
 
   useEffect(() => {
-    fetchOverview();
-    fetchConditions(selectedId);
-  }, [selectedId]);
+    fetchOverview(profile);
+    fetchConditions(selectedId, profile);
+  }, [selectedId, profile]);
 
   if (loading && !conditions) {
     return (
@@ -75,7 +74,7 @@ export default function App() {
           <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Unable to load data</h2>
           <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           <button
-            onClick={() => fetchConditions(selectedId)}
+            onClick={() => fetchConditions(selectedId, profile)}
             className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-md transition-colors"
           >
             Retry
@@ -97,7 +96,6 @@ export default function App() {
             <h1 className="text-2xl font-black tracking-tight text-blue-600 dark:text-blue-400">ClearDay CLT</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">Active Location: {location?.name}</p>
           </div>
-          {/* Location Selector Tabs */}
           <div className="flex flex-wrap gap-2 justify-center">
             {locations.map((loc) => (
               <button
@@ -115,6 +113,9 @@ export default function App() {
           </div>
         </header>
 
+        {/* Profile Selector */}
+        <ProfileSelector currentProfile={profile} onSelectProfile={(p) => setProfile(p)} />
+
         {/* Map View */}
         <MapView
           overviewData={overview}
@@ -122,7 +123,7 @@ export default function App() {
           onSelectLocation={(id) => setSelectedId(id)}
         />
 
-        {/* Main Score & Best Window Section */}
+        {/* Main Score & Best Window */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="md:col-span-1">
             <ScoreBadge score={now?.score} label={now?.label} />
@@ -130,14 +131,19 @@ export default function App() {
           <div className="md:col-span-2 flex flex-col justify-between space-y-6">
             <BestWindowBanner bestWindow={best_window} />
             <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 flex-1 flex flex-col justify-center">
-              <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Tagline</h3>
-              <p className="text-lg font-bold">The best hour to be outside, in one score.</p>
+              <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Summary</h3>
+              <p className="text-base font-semibold text-gray-800 dark:text-gray-200">
+              Conditions for <span className="text-blue-600 dark:text-blue-400 font-bold">{profile}</span> mode are currently {(now?.label ?? "").toLowerCase()}.
+              </p>
             </div>
           </div>
         </div>
 
+        {/* Recharts Score Trend */}
+       {hourly && <ScoreChart hourly={hourly} />} 
+
         {/* Hourly Cards */}
-        <HourlyCards hourly={hourly} />
+        {hourly && <HourlyCards hourly={hourly} />}
 
       </div>
     </div>
